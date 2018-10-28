@@ -7,7 +7,7 @@ public class HandControllerInput : MonoBehaviour {
 	public SteamVR_Controller.Device device;
 
 	// Teleporter
-	private LineRenderer laser;
+	public LineRenderer laser;
 	public GameObject teleportAimerObject;
 	public Vector3 teleportLocation;
 	public GameObject player;
@@ -18,7 +18,7 @@ public class HandControllerInput : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		trackedObject = GetComponent<SteamVR_TrackedObject>();
-		laser = GetComponentInChildren<LineRenderer>();
+		//laser = GetComponentInChildren<LineRenderer>();
 	}
 
 	void setLaserStart (Vector3 startPos) {
