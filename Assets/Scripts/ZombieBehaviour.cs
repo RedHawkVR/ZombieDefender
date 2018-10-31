@@ -5,87 +5,109 @@ using UnityEngine.AI;
 
 public class ZombieBehaviour : MonoBehaviour
 {
-
+	public bool isAlive, isWalking, isAttacking;
+	[SerializeField] int state;//0 idle, 1 spawning, 2 walking, 3 attacking, 4 dieing
 	public GameObject player;
-
-	private bool isWalking = false;
-	private bool isAttacking = false;
-	private bool isAlive = true;
-
+	public GameObject weapon;
+	public GameObject zombieSpawn;
 	private Animator anim;
-	private NavMeshAgent navAgent;
+	public float attackRange = 2.0f;
+	private NavMeshAgent agent;
+	public AudioSource audioSource;
 
-	private enum State { IDLE, WALKING, ATTACKING, KILLED };
-	private State currentState;
-
-	// Use this for initialization
-	void Start()
+	private void Awake()
 	{
 		anim = GetComponent<Animator>();
-		navAgent = GetComponent<NavMeshAgent>();
-		currentState = State.IDLE;
+		agent = GetComponent<NavMeshAgent>();
 	}
+
+	void Start()
+	{
+		isAlive = true;
+		isWalking = false;
+		isAttacking = false;
+		state = 1;//sets to spawn
+		zombieSpawn.GetComponent<ZombieSpawning>().addCount();
+		if (player == null)
+		{
+			player = GameObject.FindGameObjectWithTag("Player");
+		}
+	}
+
 
 	void LateUpdate()
 	{
-		transform.LookAt(player.transform);
-		switch (currentState)
+		if (zombieSpawn.GetComponent<ZombieSpawning>().time < .05)
+			isAlive = false;
+		if (isAlive)//checks if alive
 		{
-			case State.IDLE:
-				idle();
-				break;
-			case State.WALKING:
-				walk();
-				break;
-			case State.ATTACKING:
-				attack();
-				break;
-			case State.KILLED:
-				killed();
-				break;
-			default:
-				idle();
-				break;
+			transform.LookAt(player.transform);
+			if (state == 1)//sets to moving after spawn
+			{
+				state = 2;
+				isWalking = true;
+			}
+			if (state == 2)
+			{
+				anim.SetBool("isWalking", isWalking);
+				anim.SetBool("isAttacking", isAttacking);
+				agent.destination = player.transform.position;
+				agent.isStopped = false;
+				if (Vector3.Distance(transform.position, player.transform.position) <= attackRange)
+				{
+					state = 3;//sets to attack
+					isWalking = false;
+					isAttacking = true;
+				}
+			}
+			if (state == 3)
+			{
+				anim.SetBool("isWalking", isWalking);
+				anim.SetBool("isAttacking", isAttacking);
+				agent.destination = transform.position;
+				agent.isStopped = false;
+				if (Vector3.Distance(transform.position, player.transform.position) > attackRange)//when player leaves attack range
+				{
+					state = 2;//sets back to moving
+					isAttacking = false;
+					isWalking = true;
+				}
+			}
+			if (Vector3.Distance(transform.position, weapon.transform.position) <= 1.5f)//triggers when weapon gets too close
+			{
+				state = 4;//sets to dieing
+				isAlive = false;//shows as dead
+				Kill();
+			}
 		}
-
 	}
 
-	void idle()
+	private void OnCollisionEnter(Collision collision)
 	{
-		isWalking = false;
-		isAttacking = false;
-		anim.SetBool("isWalking", isWalking);
-		anim.SetBool("isAttacking", isAttacking);
-		navAgent.isStopped = true;
+		if (collision.gameObject.CompareTag("grabbable"))
+		{
+			Debug.Log("Zombie hit!");
+			state = 4;//sets to dieing
+			isAlive = false;//shows as dead
+			Kill();
+		}
 	}
 
-	void walk()
+	public void Kill()
 	{
-		isWalking = true;
-		isAttacking = false;
-		anim.SetBool("isWalking", isWalking);
-		anim.SetBool("isAttacking", isAttacking);
-		navAgent.destination = player.transform.position;
-		navAgent.isStopped = false;
+		if (isAlive == false)
+		{
+			isWalking = false;
+			isAttacking = false;
+			anim.SetBool("isWalking", isWalking);
+			anim.SetBool("isAttacking", isAttacking);
+			anim.SetBool("isAlive", isAlive);
+			zombieSpawn.GetComponent<ZombieSpawning>().reduceCount();
+			gameObject.GetComponent<NavMeshAgent>().isStopped = true;
+			gameObject.GetComponent<Rigidbody>().isKinematic = true;
+			audioSource.Play();
+			Destroy(gameObject, 2.0f);
+		}
 	}
 
-	void attack()
-	{
-		isWalking = false;
-		isAttacking = true;
-		anim.SetBool("isWalking", isWalking);
-		anim.SetBool("isAttacking", isAttacking);
-		navAgent.isStopped = false;
-	}
-
-	void killed()
-	{
-		isWalking = false;
-		isAttacking = false;
-		isAlive = false;
-		anim.SetBool("isWalking", isWalking);
-		anim.SetBool("isAttacking", isAttacking);
-		anim.SetBool("isAlive", isAlive);
-		navAgent.isStopped = true;
-	}
 }

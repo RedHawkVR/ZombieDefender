@@ -110,6 +110,10 @@ public class HandInteraction : MonoBehaviour
 		//When item grabbed -> 
 		//make controller parent, turn off physics, vibrate
 		coli.transform.SetParent(gameObject.transform);
+		if(coli.gameObject.name == "pseudoSword")
+		{
+			coli.transform.SetPositionAndRotation(coli.transform.position, new Quaternion(-15.0f, 0, 0, Quaternion.identity.w));
+		}
 		coli.GetComponent<Rigidbody>().isKinematic = true;
 		coli.GetComponent<Rigidbody>().useGravity = false;
 		device.TriggerHapticPulse(2000);
@@ -132,8 +136,8 @@ public class HandInteraction : MonoBehaviour
 		//unparent controller, turn on physics, set velocity based on controller movement
 		coli.transform.SetParent(null);
 		Rigidbody rigidBody = coli.GetComponent<Rigidbody>();
-		rigidBody.isKinematic = false;
 		rigidBody.useGravity = true;
+		rigidBody.isKinematic = false;
 		rigidBody.velocity = device.velocity * throwForce;
 		rigidBody.angularVelocity = device.angularVelocity;
 		Debug.Log("You have released the trigger");
