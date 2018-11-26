@@ -16,3 +16,17 @@ We developed this project mostly to get accustomed to desktop VR development. We
 - Unity 2018.2.12f1
 - SteamVR Plugin 2.0.1
 - Tested with Oculus Rift
+
+## How to Play
+Just unzip the ZombieDefenderBuild folder and run ZombieDefender.exe to open the game.
+
+Press the right grip button to start the game.
+
+Click down on the right joystick to spawn a fireball. You may spawn up to 5 at a time.
+- You may wonder why we used the joystick for this. It's because we intended to be able to toggle between multiple weapons.
+
+Use the right trigger to grab and throw the fireballs. You may alternatively use either grip button to grab and throw as well.
+
+Use the left trigger to teleport. Just hold down to aim, then release to teleport to the selected destination.
+
+The game isn't set to end. It infinitely spawns zombies for your slaying pleasure.
